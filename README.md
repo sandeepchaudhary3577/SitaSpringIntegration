@@ -1,9 +1,7 @@
 # SitaSpringIntegration
 Spring Integration 
 
- 
-to test checkstyle run project with mvn:checkstyle:checkstyle
-
+It is web project deployed.step to make war file for the project.
 
 # IntegrationTask
 
@@ -26,6 +24,8 @@ If an error occurs while processing the input file then the input file should be
 * log4j 1.2.17
 * junit 4.10
 * apache commons 1.3.2
+## Server
+* apache-tomcat-7.0.78
 
 
 ## Maven repository to download dependencies
@@ -35,23 +35,28 @@ https://repo.maven.apache.org/maven2/
 ## Build the application
 1. From the command prompt run mvn clean install
 ## To Test checkstyle
-1. From the command promptmvn:checkstyle:checkstyle
+1. From the command prompt mvn:checkstyle:checkstyle
+## To deployed the project
+1.Placed the war file in the \webapps directory of tomcat home.
+2.Placed the some txt file in the  D:\SITA_TEST_TASK\IN
+3.Run startup.bat command in the \apache-tomcat-7.0.78\bin directory
 ## Note
 1. It is assumed that the input files will be placed under D:\SITA_TEST_TASK\IN, however we can configure this value in application.properties which is available at src/main/resources
 
 ## Testing the application.
 1. Before running the application, place the input files under D:\SITA_TEST_TASK\IN.
-2. To run the application put the project from target in the director \webapps of tomcat.
+2. To run the application put the war file from target folder to  \webapps directory of tomcat.
 3. Verify the results in D:\SITA_TEST_TASK\OUT,D:\SITA_TEST_TASK\PROCESSED and D:\SITA_TEST_TASK\ERROR.
 
 ## Process Flow
-1. At the time when we launch the application, the inbound-channel-adapter will start automatically since we have configured auto-startup value to true.
+1. At the time when we deployed the application, the inbound-channel-adapter will start automatically since we have configured auto-startup value to true.
 2. Since the poller configured it wll poll for messages from the given input directory.
 3. All the messages one by one enter to router and the router will do the message validation. The validation will pass if the lines in the file contains numbers. If the validation fails then router will send the message to errorChannel.
 Otherwise the message will send to valid channel.
 4. On the errorChannel we have outbound-channel-adapter and this is responsible to put message into the directory specified in configuration.
-5.valid channel declared as public subsriber ,it will do two taks ,one for to gernerate .OUTPUT file extension with sum of number and other to gernerate .PROCESSED file extension 
-  1. we have service-activator and the bean referred for valid channel is responsible to generate the file content      (sum of numbers) and will send to writeOutputChannel, On the writeOutputChannel we have outbound-channel-adapter which is                responsible to generate the output in the configured directory. Since we have used configured file-name-generator then the              application is having the control to decide the name of the file. This generator will add ".OUTPUT" at the end of original file          name.
+5.valid channel declared as public subsriber ,it will execute two taks ,one for to gernerate .OUTPUT file extension with sum of number and other to gernerate .PROCESSED file extension.
+a. we have service-activator and the bean referred for valid channel is responsible to generate the file content      (sum of numbers)      and will send to writeOutputChannel, On the writeOutputChannel we have outbound-channel-adapter which is                responsible      to generate the output in the configured directory. Since we have used configured file-name-generator then the                          application is having the control to decide the name of the file. This generator will add ".OUTPUT" at the end of original file          name.
 
- 2.valid channel is responsible to generate the file content with .PROCESSED file extension.
+ b.valid channel is responsible to generate the file content with .PROCESSED file extension.
+
 
