@@ -1,9 +1,5 @@
 # SitaSpringIntegration
-Spring Integration 
-
-It is web project deployed.step to make war file for the project.
-
-# IntegrationTask
+It is web project to read the txt files from the input directory and processed the file content ,on the behalf of file content it will redirect the message to required channel and the put the file into directories.
 
 ## Task Detail: 
 Test task scenario:
