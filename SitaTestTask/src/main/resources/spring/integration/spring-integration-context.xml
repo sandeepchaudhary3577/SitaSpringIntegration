@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:int="http://www.springframework.org/schema/integration"
+    xmlns:file="http://www.springframework.org/schema/integration/file"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/integration
+            http://www.springframework.org/schema/integration/spring-integration.xsd
+            http://www.springframework.org/schema/integration/file
+            http://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+            http://www.springframework.org/schema/context 
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+    
+     <bean id="application" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="location" value="classpath:application.properties" />
+     </bean>
+     <util:properties id="propertyConfigurer" 
+                  location="classpath:application.properties "/>
+     <context:property-placeholder properties-ref="propertyConfigurer" />
+     
+     
+    <file:inbound-channel-adapter id="inputFiles" directory="${APP.DIRECTORY}\\IN" filter="filesFilter" auto-startup="true">
+      <int:poller id="poller" fixed-delay="5000"/>
+    </file:inbound-channel-adapter>
+    
+    <bean id="filesFilter"
+        class="org.springframework.integration.file.config.FileListFilterFactoryBean" p:filenamePattern="*.txt" />
+    <int:channel id="inputFiles"/> 
+      
+    <file:file-to-string-transformer input-channel="inputFiles" output-channel="output" charset="UTF-8"/>
+    <int:router input-channel="output" ref="router" method="handleFile"/>
+    <bean id="router" class="com.niit.springIntegration.demo.SpringIntegrationRouter"/>   
+    
+    <int:publish-subscribe-channel id="validChannel"></int:publish-subscribe-channel>    
+    
+		
+	<file:outbound-channel-adapter channel="validChannel"  directory="${APP.DIRECTORY}\\PROCESSED" auto-create-directory="true"  filename-generator="processedFileNameAppender"/>
+    <bean id="processedFileNameAppender"  class="com.niit.springIntegration.demo.FileNameAppender">
+    	<property name="suffix" value="PROCESSED"/>
+    </bean> 
+    
+    <int:service-activator input-channel="validChannel" ref="messageProcesser" method="processMessage" output-channel="writeOutputChannel"/>		
+	<bean id="messageProcesser" class="com.niit.springIntegration.demo.MessageProcessor" /> 
+     	
+	<file:outbound-channel-adapter id="writeOutputChannel"   directory="${APP.DIRECTORY}\\OUT"  auto-create-directory="true"  filename-generator="outputFileNameAppender"/>    
+    <bean id="outputFileNameAppender"  class="com.niit.springIntegration.demo.FileNameAppender" >
+     <property name="suffix" value="OUTPUT"/> 
+    </bean>    
+    
+    <file:outbound-channel-adapter id="errorChannel"  directory="${APP.DIRECTORY}\\ERROR" auto-create-directory="true" filename-generator="errorFileNameAppender"/>         
+    <bean id="errorFileNameAppender" class="com.niit.springIntegration.demo.FileNameAppender" >
+      <property name="suffix" value="ERROR"/>
+    </bean>  
+</beans>
